@@ -115,7 +115,9 @@ if options.project_name != "":
 source_root = os.path.abspath(os.path.dirname(options.input_filename)) + "/"
 source_root = source_root.replace("\\", "/")
 
-build_dir = project_path.Path(source_root).join("../build/" + options.project_name + "/" + options.platform_string + "/")
+# JME - keep in tree
+# build_dir = project_path.Path(source_root).join("../build/" + options.project_name + "/" + options.platform_string + "/")
+build_dir = source_root + "build/" + options.project_name + "/" + options.platform_string + "/"
 build_dir = build_dir.replace("\\", "/")
 
 target_filename_prefix = build_dir

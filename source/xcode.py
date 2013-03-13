@@ -239,6 +239,10 @@ class PBXFileReference(XcodeProjectObject):
 		elif extension == "c":
 			self.lastKnownFileType = "sourcecode.c.c"
 			self.sourceTree = "SOURCE_ROOT"
+		# JME add support for nasm
+		elif extension == "asm":
+			self.lastKnownFileType = "sourcecode.nasm"
+			self.sourceTree = "SOURCE_ROOT"
 		elif extension == "h" or extension == "pch":
 			self.lastKnownFileType = "sourcecode.c.h"
 			self.sourceTree = "SOURCE_ROOT"
@@ -466,12 +470,16 @@ class XcodeObjects(XcodeProjectSectionObject):
 		self.build_configurations = []
 		self.configuration_lists = []
 
-		extensions = ["cpp", "c", "h", "pch", "xib", "m", "mm"]
+		# JME asm
+		# extensions = ["cpp", "c", "h", "pch", "xib", "m", "mm"]
+		extensions = ["cpp", "c", "h", "pch", "xib", "m", "mm", "asm" ]
 		self.generate_build_files(source_root, project.settings.source_filenames(), extensions, object_factory, default_groups.classes)
-		extensions = ["plist"]
-		self.generate_file_references(project.settings.source_filenames(), extensions, object_factory, default_groups.resources)
-		extensions = None
-		self.generate_build_files(source_root, project.settings.resource_filenames(), extensions, object_factory, default_groups.resources)
+		# JME. static library has no plist ..
+		if project.target_type != "library":
+			extensions = ["plist"]
+			self.generate_file_references(project.settings.source_filenames(), extensions, object_factory, default_groups.resources)
+			extensions = None
+			self.generate_build_files(source_root, project.settings.resource_filenames(), extensions, object_factory, default_groups.resources)
 
 		if project.target_type == "library":
 			project.library_filenames.append("Foundation.framework") # not sure if all libraries need Foundation?
@@ -497,9 +505,12 @@ class XcodeObjects(XcodeProjectSectionObject):
 
 		self.groups = default_groups.flatten_groups()
 
-		self.target_product = self.product(object_factory, default_groups.products, project.name(), project.target_type,  project.settings.library_search_paths)
+		# JME
+		# self.target_product = self.product(object_factory, default_groups.products, project.name(), project.target_type,  project.settings.library_search_paths)
+		self.target_product = self.product(object_factory, default_groups.products, project.name(), project.target_type,  project.settings.library_search_paths, source_root)
 		if project.target_type == "library":
-			self.project = self.create_project_for_library(object_factory, project.name(), default_groups.root_group(), default_groups.products, self.target_product, project.header_paths, project.defines)
+			# JME added platform ...
+			self.project = self.create_project_for_library(object_factory, project.name(), default_groups.root_group(), default_groups.products, self.target_product, project.settings.header_paths, project.settings.defines, platform)
 		else:
 			self.project = self.create_project_for_application(object_factory, project.name(), default_groups.root_group(), default_groups.products, self.target_product, project.settings.header_paths, project.settings.defines, project.configurations, platform)
 
@@ -531,8 +542,8 @@ class XcodeObjects(XcodeProjectSectionObject):
 		for file_reference in self.source_file_references:
 			file_reference.change_short_name(source_path)
 
-	def create_project_for_library(self, object_factory, name, root_group, products_group, target_product, header_paths, defines):
-		build_configuration_list = self.create_project_configuration_list_for_library(object_factory, name, header_paths, defines)
+	def create_project_for_library(self, object_factory, name, root_group, products_group, target_product, header_paths, defines,platform):
+		build_configuration_list = self.create_project_configuration_list_for_library(object_factory, name, header_paths, defines,platform)
 		return object_factory.create(PBXProject, build_configuration_list, root_group, products_group, [target_product])
 
 	def create_project_for_application(self, object_factory, name, root_group, products_group, target_product, header_paths, defines, configurations, platform):
@@ -582,8 +593,9 @@ class XcodeObjects(XcodeProjectSectionObject):
 		build_configurations = [
 			self.create_target_debug_configuration_for_application(factory, name, plist_filename, library_search_paths),
 			self.create_target_release_configuration_for_application(factory, name, plist_filename, library_search_paths),
-			self.create_target_adhoc_configuration_for_application(factory, name, plist_filename, library_search_paths),
-			self.create_target_distribution_configuration_for_application(factory, name, plist_filename, library_search_paths),
+			# JME - 
+			# self.create_target_adhoc_configuration_for_application(factory, name, plist_filename, library_search_paths),
+			# self.create_target_distribution_configuration_for_application(factory, name, plist_filename, library_search_paths),
 		]
 
 		return build_configurations
@@ -687,30 +699,39 @@ class XcodeObjects(XcodeProjectSectionObject):
 		build_configurations = [
 			self.create_project_debug_configuration_for_application(factory, name, header_paths, defines + configurations["debug"].defines, platform),
 			self.create_project_release_configuration_for_application(factory, name, header_paths, defines + configurations["release"].defines, platform),
-			self.create_project_adhoc_configuration_for_application(factory, name, header_paths, defines + configurations["adhoc"].defines, platform),
-			self.create_project_distribution_configuration_for_application(factory, name, header_paths, defines + configurations["distribution"].defines, platform),
+			# JME
+			# self.create_project_adhoc_configuration_for_application(factory, name, header_paths, defines + configurations["adhoc"].defines, platform),
+			# self.create_project_distribution_configuration_for_application(factory, name, header_paths, defines + configurations["distribution"].defines, platform),
 		]
 
 		return build_configurations
 
-	def create_project_build_settings_for_library(self, header_paths, defines):
-		build_settings = self.create_common_project_build_settings(header_paths, defines)
+	# JME
+	# def create_project_build_settings_for_library(self, header_paths, defines):
+	def create_project_build_settings_for_library(self, header_paths, defines, platform):
+		# JME
+		# build_settings = self.create_common_project_build_settings(header_paths, defines)
+		build_settings = self.create_common_project_build_settings(header_paths, defines, platform)
 		build_settings["OTHER_LDFLAGS"] = "-ObjC"
 		return build_settings
 
-	def create_project_release_configuration_for_library(self, object_creator, name, header_paths, defines):
-		build_settings = self.create_project_build_settings_for_library(header_paths, defines)
+	def create_project_release_configuration_for_library(self, object_creator, name, header_paths, defines,platform):
+		# JME
+		# build_settings = self.create_project_build_settings_for_library(header_paths, defines)
+		build_settings = self.create_project_build_settings_for_library(header_paths, defines,platform)
 		return self.create_build_configuration(object_creator, "Release", build_settings, "project")
 
-	def create_project_debug_configuration_for_library(self, object_creator, name, header_paths, defines):
-		build_settings = self.create_project_build_settings_for_library(header_paths)
+	def create_project_debug_configuration_for_library(self, object_creator, name, header_paths, defines,platform):
+		# JME
+		# build_settings = self.create_project_build_settings_for_library(header_paths)
+		build_settings = self.create_project_build_settings_for_library(header_paths,defines,platform)
 		build_settings["GCC_OPTIMIZATION_LEVEL"] = 0
 		return self.create_build_configuration(object_creator, "Debug", build_settings, "project")
 
-	def create_project_build_configurations_for_library(self, factory, name, header_paths, defines):
+	def create_project_build_configurations_for_library(self, factory, name, header_paths, defines,platform):
 		build_configurations = [
-			self.create_project_debug_configuration_for_library(factory, name, header_paths, defines),
-			self.create_project_release_configuration_for_library(factory, name, header_paths, defines)
+			self.create_project_debug_configuration_for_library(factory, name, header_paths, defines,platform),
+			self.create_project_release_configuration_for_library(factory, name, header_paths, defines,platform)
 		]
 
 		return build_configurations
@@ -736,18 +757,22 @@ class XcodeObjects(XcodeProjectSectionObject):
 		configuration_list = self.create_configuration_list(object_creator, target_build_configurations, "target")
 		return configuration_list
 
-	def create_project_configuration_list_for_library(self, object_creator, name, header_paths, defines):
-		project_build_configurations = self.create_project_build_configurations_for_library(object_creator, name, header_paths, defines)
+	# JME
+	# def create_project_configuration_list_for_library(self, object_creator, name, header_paths, defines):
+	def create_project_configuration_list_for_library(self, object_creator, name, header_paths, defines, platform):
+		project_build_configurations = self.create_project_build_configurations_for_library(object_creator, name, header_paths, defines,platform)
 		configuration_list = self.create_configuration_list(object_creator, project_build_configurations, "project")
 		return configuration_list
 
-	def product(self, object_factory, products_group, name, product_type, library_search_paths):
+	def product(self, object_factory, products_group, name, product_type, library_search_paths, source_root):
 		if product_type == "library":
 			target_filename = "lib" + name + ".a"
 			target_configuration_list = self.create_target_configuration_list_for_library(object_factory, name)
 		else:
 			target_filename = name + ".app"
-			plist_filename = self.file_references_with_extensions(["plist"])[0].path
+			# JME
+			# plist_filename = self.file_references_with_extensions(["plist"])[0].path # "ex.plist" 
+			plist_filename = source_root + name + ".plist" 
 			target_configuration_list = self.create_target_configuration_list_for_application(object_factory, name, plist_filename, library_search_paths)
 
 		product_file_reference = self.create_file_reference(object_factory, products_group, target_filename)
@@ -755,7 +780,9 @@ class XcodeObjects(XcodeProjectSectionObject):
 		return object_factory.create(PBXNativeTarget, name, product_file_reference, target_configuration_list, build_phases, product_type)
 
 	def all_source_build_files(self, project):
-		return self.build_files_with_extensions(["cpp", "c", "m", "mm"])
+		# JME
+		# return self.build_files_with_extensions(["cpp", "c", "m", "mm"])
+		return self.build_files_with_extensions(["cpp", "c", "m", "mm", "asm" ])
 
 	def all_header_build_files(self, project):
 		return self.build_files_with_extensions(["pch", "h"])
