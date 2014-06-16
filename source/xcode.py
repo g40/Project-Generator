@@ -600,6 +600,7 @@ class XcodeObjects(XcodeProjectSectionObject):
 
 		return build_configurations
 
+###############################################################################
 	def create_common_target_build_settings_for_library(self, name):
 		build_settings = {
 			"ALWAYS_SEARCH_USER_PATHS": "NO",
@@ -615,6 +616,7 @@ class XcodeObjects(XcodeProjectSectionObject):
 		}
 		return build_settings
 
+###############################################################################
 	def create_target_debug_configuration_for_library(self, object_creator, name):
 		build_settings = self.create_common_target_build_settings_for_library(name)
 		build_settings.update( {
@@ -626,10 +628,12 @@ class XcodeObjects(XcodeProjectSectionObject):
 
 		return self.create_build_configuration(object_creator, "Debug", build_settings, "target")
 
+###############################################################################
 	def create_target_release_configuration_for_library(self, object_creator, name):
 		build_settings = self.create_common_target_build_settings_for_library(name)
 		return self.create_build_configuration(object_creator, "Release", build_settings, "target")
 
+###############################################################################
 	def create_target_build_configurations_for_library(self, factory, name):
 		build_configurations = [
 			self.create_target_debug_configuration_for_library(factory, name),
@@ -638,7 +642,10 @@ class XcodeObjects(XcodeProjectSectionObject):
 
 		return build_configurations
 
+###############################################################################
 	def create_common_project_build_settings(self, header_paths, defines, platform):
+#		JME initialize 
+		build_settings = {}
 		if platform == "iphone":
 			build_settings = {
 				"ARCHS": "$(ARCHS_STANDARD_32_BIT)",
@@ -663,31 +670,37 @@ class XcodeObjects(XcodeProjectSectionObject):
 				"HEADER_SEARCH_PATHS": header_paths
 			}
 		
+		# 
 		build_settings["GCC_PREPROCESSOR_DEFINITIONS"] = defines
 
 		return build_settings
 
+###############################################################################
 	def create_project_build_settings_for_application(self, header_paths, defines, platform):
 		build_settings = self.create_common_project_build_settings(header_paths, defines, platform)
 		build_settings["CODE_SIGN_IDENTITY[sdk=iphoneos*]"] = "iPhone Developer"
 		return build_settings
 
+###############################################################################
 	def create_project_release_configuration_for_application(self, object_creator, name, header_paths, defines, platform):
 		build_settings = self.create_project_build_settings_for_application(header_paths, defines, platform)
 		return self.create_build_configuration(object_creator, "Release", build_settings, "project")
 
+###############################################################################
 	def create_project_adhoc_configuration_for_application(self, object_creator, name, header_paths, defines, platform):
 		build_settings = self.create_project_build_settings_for_application(header_paths, defines, platform)
 		build_settings["CODE_SIGN_IDENTITY[sdk=iphoneos*]"] = "iPhone Distribution"
 		build_settings["VALIDATE_PRODUCT"] = "YES"
 		return self.create_build_configuration(object_creator, "AdHoc", build_settings, "project")
 
+###############################################################################
 	def create_project_distribution_configuration_for_application(self, object_creator, name, header_paths, defines, platform):
 		build_settings = self.create_project_build_settings_for_application(header_paths, defines, platform)
 		build_settings["CODE_SIGN_IDENTITY[sdk=iphoneos*]"] = "iPhone Distribution"
 		build_settings["VALIDATE_PRODUCT"] = "YES"
 		return self.create_build_configuration(object_creator, "AppStore", build_settings, "project")
 
+###############################################################################
 	def create_project_debug_configuration_for_application(self, object_creator, name, header_paths, defines, platform):
 		build_settings = self.create_project_build_settings_for_application(header_paths, defines, platform)
 		build_settings["GCC_PREPROCESSOR_DEFINITIONS"] = build_settings["GCC_PREPROCESSOR_DEFINITIONS"]
@@ -695,6 +708,7 @@ class XcodeObjects(XcodeProjectSectionObject):
 		bc = self.create_build_configuration(object_creator, "Debug", build_settings, "project")
 		return bc
 
+###############################################################################
 	def create_project_build_configurations_for_application(self, factory, name, header_paths, defines, configurations, platform):
 		build_configurations = [
 			self.create_project_debug_configuration_for_application(factory, name, header_paths, defines + configurations["debug"].defines, platform),
@@ -706,6 +720,7 @@ class XcodeObjects(XcodeProjectSectionObject):
 
 		return build_configurations
 
+###############################################################################
 	# JME
 	# def create_project_build_settings_for_library(self, header_paths, defines):
 	def create_project_build_settings_for_library(self, header_paths, defines, platform):

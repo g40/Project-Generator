@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8cf56ba7-851a-4dd4-8d18-a38120776201}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>generate.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <CommandLineArguments>-i  R:\src\omg\Desktop2\server\testclient.xml -g xcode -n testclient -p mac_os_x</CommandLineArguments>
+    <InterpreterPath />
+    <InterpreterArguments />
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <ItemGroup>
+    <Compile Include="codeblocks.py" />
+    <Compile Include="codelite.py" />
+    <Compile Include="debug.py" />
+    <Compile Include="generate.py" />
+    <Compile Include="makefile.py" />
+    <Compile Include="project.py" />
+    <Compile Include="project_object.py" />
+    <Compile Include="project_parser.py" />
+    <Compile Include="project_path.py" />
+    <Compile Include="project_writer.py" />
+    <Compile Include="visualc.py" />
+    <Compile Include="xcode.py" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+</Project>
