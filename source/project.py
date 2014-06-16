@@ -58,12 +58,16 @@ class Settings(object):
 		self.header_paths = []
 		self.root_source_files = SourceFileNode()
 		self.library_search_paths = []
+#	JME added
+		self.resource_search_paths = []
 		self.library_filenames = []
 		self.framework_names = []
 		self.root_resource_files = SourceFileNode()
 		self.compiler_executable = None
 		self.compiler_flags = None
 		self.linker_flags = None
+#
+		self.plist_path = None;
 
 	def add_define(self, name):
 		self.defines.append(name)
@@ -105,6 +109,10 @@ class Settings(object):
 
 	def add_library_search_path(self, path):
 		self.library_search_paths.append(path)
+
+#	plist path
+	def add_plist_path(self, path):
+		self.plist_path = path
 
 	def set_compiler(self, compiler, flags):
 		self.compiler_executable = compiler

@@ -39,6 +39,11 @@ class LibraryPath:
 	def __init__(self):
 		self.directory = ""
 
+# JME
+class ResourcePath:
+	def __init__(self):
+		self.directory = ""
+
 class Compiler:
 	def __init__(self):
 		self.flags = ""
@@ -101,6 +106,12 @@ class Parser:
 				library_path = LibraryPath()
 				self.parse_object(library_path, sub_node)
 				settings.add_library_search_path(library_path.directory)
+#			JME added resource path to project file
+			elif sub_node.localName == "plist-path":
+				resource_path = ResourcePath()
+				self.parse_object(resource_path, sub_node)
+				settings.add_plist_path(resource_path.plist)
+			#	settings.add_resource_search_path(resource_path.directory)
 
 			elif sub_node.localName == "compiler":
 				compiler = Compiler()
@@ -145,6 +156,8 @@ class Parser:
 			if "directory" in item.name:
 				before = item.value
 				item.value = self.convert_path(item.value)
+			elif "plist" in item.name:
+				item.value = item.value
 			elif item.value != "" and item.value[0] == "[":
 				value = item.value[1:-1]
 				value_list = value.split()

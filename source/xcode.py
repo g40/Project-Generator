@@ -507,7 +507,7 @@ class XcodeObjects(XcodeProjectSectionObject):
 
 		# JME
 		# self.target_product = self.product(object_factory, default_groups.products, project.name(), project.target_type,  project.settings.library_search_paths)
-		self.target_product = self.product(object_factory, default_groups.products, project.name(), project.target_type,  project.settings.library_search_paths, source_root)
+		self.target_product = self.product(object_factory, default_groups.products, project.name(), project.target_type,  project.settings.library_search_paths, source_root,project.settings)
 		if project.target_type == "library":
 			# JME added platform ...
 			self.project = self.create_project_for_library(object_factory, project.name(), default_groups.root_group(), default_groups.products, self.target_product, project.settings.header_paths, project.settings.defines, platform)
@@ -779,15 +779,17 @@ class XcodeObjects(XcodeProjectSectionObject):
 		configuration_list = self.create_configuration_list(object_creator, project_build_configurations, "project")
 		return configuration_list
 
-	def product(self, object_factory, products_group, name, product_type, library_search_paths, source_root):
+	def product(self, object_factory, products_group, name, product_type, library_search_paths, source_root, settings):
 		if product_type == "library":
 			target_filename = "lib" + name + ".a"
 			target_configuration_list = self.create_target_configuration_list_for_library(object_factory, name)
 		else:
 			target_filename = name + ".app"
 			# JME
-			# plist_filename = self.file_references_with_extensions(["plist"])[0].path # "ex.plist" 
-			plist_filename = source_root + name + ".plist" 
+			#plist_filename = self.file_references_with_extensions(["plist"])[0].path # "ex.plist" 
+			#plist_filename = source_root + name + ".plist" 
+			# plist_filename = "./" + name + "/" + name + ".plist" 
+			plist_filename = settings.plist_path
 			target_configuration_list = self.create_target_configuration_list_for_application(object_factory, name, plist_filename, library_search_paths)
 
 		product_file_reference = self.create_file_reference(object_factory, products_group, target_filename)

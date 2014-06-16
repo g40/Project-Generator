@@ -47,7 +47,9 @@ for option, value in optlist:
 	elif option == "-d":
 		options.data_path = os.path.abspath(value)
 	elif option == "-r":
-		options.resource_path = os.path.abspath(value)
+# No. make this as given on the command line 
+#		options.resource_path = os.path.abspath(value)
+		options.resource_path = value.replace('\\','/')
 	elif option == "-n":
 		options.project_name = value
 
@@ -74,11 +76,11 @@ def create_project(filename, platform_string, data_path, resource_path):
 	if target_project.target_type != "library":
 		if data_path != None:
 			resource_root = os.path.normpath(data_path) + "/"
-			# print("data:", resource_root)
+			print("data:", resource_root)
 			target_project.settings.add_resource_directory(resource_root, False, [])
 
 		resource_root = os.path.normpath(resource_path) + "/" + platform_string + "/"
-		# print("Resource:", resource_root)
+		print("Resource:", resource_root)
 		target_project.settings.add_resource_directory(resource_root, False, [])
 
 
@@ -117,7 +119,7 @@ source_root = source_root.replace("\\", "/")
 
 # JME - keep in tree
 # build_dir = project_path.Path(source_root).join("../build/" + options.project_name + "/" + options.platform_string + "/")
-build_dir = source_root + "build/" + options.project_name + "/" + options.platform_string + "/"
+build_dir = source_root + "project_files/" + options.project_name + "/" + options.platform_string + "/"
 build_dir = build_dir.replace("\\", "/")
 
 target_filename_prefix = build_dir
